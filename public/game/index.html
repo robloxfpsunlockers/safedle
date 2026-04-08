@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Safedle - A Higher or Lower Game</title>
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Safedle - A Higher or Lower Game" />
+  <meta property="og:description" content="Guess which Character or Tag has more posts on Safebooru" />
+  <meta name="description" content="Guess which Character or Tag has more posts on Safebooru" />
+  <meta name="keywords" content="safebooru, higher or lower, guessing game, anime, characters" />
+
+  <link rel="stylesheet" href="style.css" />
+  <script src="cache.js"></script>
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <img src="logo.png" alt="Safedle" class="logo" />
+      <a href="daily.html" id="daily-mode-btn" class="daily-mode-btn">
+        Daily Challenge
+      </a>
+      <button id="how-to-play-btn" class="how-to-play-btn">
+        How to Play
+      </button>
+
+      <!-- Franchise Filter Toggle -->
+      <div class="franchise-toggle-container">
+        <label class="toggle-switch">
+          <input type="checkbox" id="franchise-toggle" checked />
+          <span class="toggle-slider"></span>
+        </label>
+        <span class="toggle-label">Include franchises</span>
+        <button class="info-icon" id="franchise-info-btn" title="Click for more information">
+          ?
+        </button>
+      </div>
+
+      <div class="stats">
+        <!-- Difficulty Selector -->
+        <div class="difficulty-selector">
+          <label for="difficulty-select">Difficulty:</label>
+          <select id="difficulty-select" class="difficulty-dropdown">
+            <option value="easy">Easy</option>
+            <option value="medium" selected>Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+        </div>
+
+        <div class="stat">
+          <span class="label">Current Streak:</span>
+          <span id="streak" class="value">0</span>
+        </div>
+        <div class="stat">
+          <span class="label">Best Streak:</span>
+          <span id="best-streak" class="value">0</span>
+        </div>
+        <div class="stat">
+          <span class="label">Score:</span>
+          <span id="current-score" class="value">0</span>
+        </div>
+        <div class="stat">
+          <span class="label">Total Score:</span>
+          <span id="total-score" class="value">0</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Loading Screen -->
+    <div id="loading" class="loading">
+      <div class="spinner"></div>
+      <p>Loading characters...</p>
+    </div>
+
+    <!-- Error Message -->
+    <div id="error-message" class="error-message" style="display: none">
+      <h2>Connection Error</h2>
+      <p>
+        Unable to load character data. Please check your internet connection
+        and try again.
+      </p>
+      <button onclick="location.reload()">Retry</button>
+    </div>
+
+    <!-- Game Content -->
+    <div id="game-content" class="game-content" style="display: none">
+      <!-- Difficulty Indicator -->
+      <div class="difficulty-indicator">
+        <span class="difficulty-label">Difficulty: </span>
+        <span id="difficulty-display" class="difficulty-value">Medium</span>
+      </div>
+
+      <!-- Game Characters Container -->
+      <div class="game-characters">
+        <div class="character-container left">
+          <div class="character-card">
+            <h2 id="left-character">Character Name</h2>
+            <div id="left-character-notes" class="character-subtext"></div>
+            <div id="left-count-container" class="post-count">
+              <span id="left-count-display">0</span>
+              <span class="label">posts</span>
+            </div>
+            <div id="left-count-display2" class="secondary-count">0</div>
+          </div>
+        </div>
+
+        <div class="vs-section">
+          <div class="instruction-text">Which has more posts?</div>
+          <div class="vs-text">VS</div>
+        </div>
+
+        <div class="character-container right">
+          <div class="character-card">
+            <h2 id="right-character">Character Name</h2>
+            <div id="right-character-notes" class="character-subtext"></div>
+            <div id="right-count-container" class="post-count hidden">
+              <span id="right-count">0</span>
+              <span class="label">posts</span>
+            </div>
+            <div class="question-mark">?</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Overlay -->
+    <div id="result-overlay" class="result-overlay" style="display: none">
+      <div class="result-content">
+        <h2 id="result-text" class="result-text">Correct!</h2>
+        <div id="result-stats" class="result-stats">
+          <p>Your streak: <span id="current-streak">0</span></p>
+          <p>Best streak: <span id="best-streak-result">0</span></p>
+          <p class="score-info">
+            Round score: <span id="round-score">0</span>
+          </p>
+          <p class="score-info">
+            Time taken: <span id="time-taken">0.0s</span>
+          </p>
+          <p class="score-info">
+            Total score: <span id="result-total-score">0</span>
+          </p>
+        </div>
+        <div class="result-buttons">
+          <button id="next-btn" class="btn primary">Next Round</button>
+          <button id="retry-btn" class="btn secondary">Start Over</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- How to Play Popup -->
+    <div id="how-to-play-popup" class="popup-overlay" style="display: none">
+      <div class="popup-content">
+        <div class="popup-header">
+          <h2>How to Play</h2>
+          <button id="close-popup" class="close-popup">×</button>
+        </div>
+        <div class="popup-body">
+          <p>Welcome to Safedle! Here's how to play:</p>
+          <ul>
+            <li>You'll see two characters or tags side by side</li>
+            <li>The left side shows a character/tag with its post count</li>
+            <li>
+              The right side shows another character/tag with a hidden post
+              count (?)
+            </li>
+            <li>
+              <strong>Your goal:</strong> Click on the character/tag you think
+              has <strong>MORE posts</strong>
+            </li>
+            <li>
+              If you think the left character has more posts, click on the
+              left card
+            </li>
+            <li>
+              If you think the right character has more posts, click on the
+              right card
+            </li>
+            <li>Try to build the longest streak possible!</li>
+          </ul>
+
+          <h4>Scoring System:</h4>
+          <ul>
+            <li><strong>Base Score:</strong> 100 points per correct answer</li>
+            <li><strong>Difficulty Bonus:</strong> Easy (1x), Medium (1.5x), Hard (2.5x)</li>
+            <li><strong>Speed Bonus:</strong> Answer faster for up to 50% bonus points</li>
+            <li><strong>Streak Bonus:</strong> Consecutive correct answers boost your score</li>
+            <li><strong>Challenge Bonus:</strong> Similar post counts = harder guess = more points</li>
+          </ul>
+
+          <h4>Difficulty Levels:</h4>
+          <ul>
+            <li><strong>Easy:</strong> Popular characters (20,000+ posts)</li>
+            <li><strong>Medium:</strong> Moderate characters (5,000-50,000 posts)</li>
+            <li><strong>Hard:</strong> Obscure characters (0-10,000 posts)</li>
+          </ul>
+
+          <p>Good luck and have fun!</p>
+        </div>
+        <div class="popup-footer">
+          <button id="got-it-btn" class="btn primary">Got it!</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Changelog Popup -->
+    <div id="changelog-popup" class="popup-overlay" style="display: none">
+      <div class="popup-content">
+        <div class="popup-header">
+          <h2>Changelog</h2>
+          <button id="close-changelog-popup" class="close-popup">×</button>
+        </div>
+        <div class="popup-body">
+          <div class="changelog-entry">
+            <h3>Version 2.0 - 2025</h3>
+            <ul>
+              <li><strong>🎮 Difficulty Levels:</strong> Easy, Medium, and Hard modes.</li>
+              <li><strong>🏆 Scoring System:</strong> Points based on difficulty, speed, and streaks.</li>
+              <li><strong>🎯 Achievement System:</strong> Unlock 12 unique achievements.</li>
+              <li><strong>✨ Visual Enhancements:</strong> Smooth animations and character images.</li>
+              <li><strong>📱 Mobile Optimization:</strong> Touch gestures and swipe controls.</li>
+              <li><strong>🖼️ Safebooru Images:</strong> Auto-fetched SFW character images.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="popup-footer">
+          <button id="close-changelog-btn" class="btn primary">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Franchise Info Popup -->
+    <div id="franchise-info-popup" class="popup-overlay" style="display: none">
+      <div class="popup-content">
+        <div class="popup-header">
+          <h2>Franchise Filter</h2>
+          <button id="close-franchise-info" class="close-popup">×</button>
+        </div>
+        <div class="popup-body">
+          <p><strong>What does "Include franchises" mean?</strong></p>
+          <p>
+            This toggle controls whether the game includes broad franchise
+            tags or focuses on specific characters.
+          </p>
+          <h4>When enabled (default):</h4>
+          <ul>
+            <li>Shows both individual characters and franchise tags</li>
+            <li>Examples: "Pokémon", "Naruto", "Genshin Impact"</li>
+          </ul>
+          <h4>When disabled:</h4>
+          <ul>
+            <li>Shows only specific individual characters</li>
+            <li>Examples: "Pikachu", "Mikasa Ackerman", "Hatsune Miku"</li>
+          </ul>
+        </div>
+        <div class="popup-footer">
+          <button id="franchise-info-got-it" class="btn primary">Got it!</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Report Problem Button -->
+  <button id="report-problem-btn" class="report-problem-btn">
+    Report Problem
+  </button>
+
+  <!-- Report Problem Popup -->
+  <div id="report-problem-popup" class="report-popup-overlay" style="display: none">
+    <div class="report-popup-content">
+      <div class="report-popup-header">
+        <h3>Report a Problem</h3>
+        <button id="close-report-popup" class="close-popup">×</button>
+      </div>
+      <div class="report-subtext">
+        <p>Submit feedback, bugs or incorrect tag information here</p>
+      </div>
+      <form id="report-form" class="report-form">
+        <div class="form-group">
+          <label for="report-title">Title*</label>
+          <input type="text" id="report-title" name="title" required maxlength="100"
+            placeholder="Brief description of the issue" />
+        </div>
+        <div class="form-group">
+          <label for="report-contact">Contact Info (optional)</label>
+          <input type="text" id="report-contact" name="contact" maxlength="100"
+            placeholder="If you want me to get back to you" />
+        </div>
+        <div class="form-group">
+          <label for="report-description">Description*</label>
+          <textarea id="report-description" name="description" required maxlength="1000" rows="5"
+            placeholder="Please describe the problem in detail..."></textarea>
+        </div>
+        <div class="form-buttons">
+          <button type="button" id="cancel-report" class="btn secondary">Cancel</button>
+          <button type="submit" id="submit-report" class="btn primary">Submit Report</button>
+        </div>
+      </form>
+      <div id="report-status" class="report-status" style="display: none"></div>
+    </div>
+  </div>
+
+  <!-- Achievements Popup -->
+  <div id="achievements-popup" class="popup-overlay" style="display: none">
+    <div class="popup-content achievements-popup">
+      <div class="popup-header">
+        <h2>🏆 Achievements</h2>
+        <button id="close-achievements-popup" class="close-popup">×</button>
+      </div>
+      <div class="popup-body">
+        <div class="achievements-stats">
+          <div class="achievement-summary">
+            <span id="achievement-count">0/12</span> Achievements Unlocked
+          </div>
+        </div>
+        <div class="achievements-grid" id="achievements-grid"></div>
+      </div>
+      <div class="popup-footer">
+        <button id="close-achievements-btn" class="btn btn-primary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Achievement notification -->
+  <div id="achievement-notification" class="achievement-notification" style="display: none">
+    <div class="achievement-content">
+      <div class="achievement-icon"></div>
+      <div class="achievement-details">
+        <div class="achievement-title">Achievement Unlocked!</div>
+        <div class="achievement-name"></div>
+        <div class="achievement-description"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

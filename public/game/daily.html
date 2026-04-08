@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+  
+<!-- Mirrored from www.rule34dle.org/game/daily.html?embed=true by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 13 Jan 2026 14:37:06 GMT -->
+<!-- Added by HTTrack --><meta http-equiv="content-type" content="text/html;charset=utf-8" /><!-- /Added by HTTrack -->
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rule34dle Daily - Daily Challenge</title>
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="../daily.html" />
+    <meta property="og:title" content="Rule34dle Daily - Daily Challenge" />
+    <meta property="og:description" content="Play the daily Rule34dle challenge - 10 rounds of guessing which character has more posts" />
+    <meta property="og:image" content="../preview-image.html" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="../daily.html" />
+    <meta property="twitter:title" content="Rule34dle Daily - Daily Challenge" />
+    <meta property="twitter:description" content="Play the daily Rule34dle challenge - 10 rounds of guessing which character has more posts" />
+    <meta property="twitter:image" content="../preview-image.html" />
+
+    <!-- Additional SEO -->
+    <meta name="description" content="Play the daily Rule34dle challenge - 10 rounds of guessing which character has more posts" />
+    <meta name="keywords" content="rule34, daily challenge, higher or lower, guessing game, characters, tags" />
+    <meta name="author" content="rule34dle" />
+
+    <!-- Canonical URL for SEO -->
+    <link rel="canonical" href="../daily.html" />
+
+    <link rel="stylesheet" href="style.css" />
+    <script src="cache.js"></script>
+    <!-- Detect if in iframe and handle navigation -->
+    <script>
+      (function() {
+        // Check if we're in an iframe
+        if (window.self !== window.top) {
+          // Override link clicks to navigate parent window with locale awareness
+          document.addEventListener('DOMContentLoaded', function() {
+            const supportedLocales = ['en', 'zh', 'zh-TW', 'ja', 'es', 'fr', 'de', 'ru', 'pt', 'it', 'nl', 'ko', 'hi', 'tr', 'ar', 'th'];
+            const links = document.querySelectorAll('a[href^="/"]');
+
+            links.forEach(link => {
+              link.addEventListener('click', function(e) {
+                e.preventDefault();
+                // Get the current parent window URL to extract locale
+                const parentPath = window.top.location.pathname;
+                const pathParts = parentPath.split('../index.html').filter(Boolean);
+                const firstPart = pathParts[0] || '';
+                const locale = supportedLocales.includes(firstPart) ? firstPart : '';
+
+                // Construct the new URL with locale if present
+                const targetPath = this.getAttribute('href');
+                const newUrl = locale ? `/${locale}${targetPath}` : targetPath;
+                window.top.location.href = newUrl;
+              });
+            });
+          });
+        }
+      })();
+    </script>
+  </head>
+
+  <body class="daily">
+    <div class="container">
+      <header>
+        <img src="logo.png" alt="Rule34dle" class="logo" />
+        <a
+          href="../game.html"
+          id="back-to-main"
+          class="back-btn"
+          title="Back to main mode"
+          >← Main Mode</a
+        >
+
+        <div class="daily-header">
+          <h2>Daily Challenge</h2>
+          <div class="daily-stats">
+            <div class="stat">
+              <span class="label">Round:</span>
+              <span id="current-round" class="value">1/10</span>
+            </div>
+            <button
+              id="back-to-current-round"
+              class="btn secondary"
+              style="display: none"
+              type="button"
+            >
+              Back to Game
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <p>Loading daily challenge...</p>
+      </div>
+
+      <div id="error-message" class="error-message" style="display: none">
+        <h2>Connection Error</h2>
+        <p>
+          Unable to load character data. Please check your internet connection
+          and try again.
+        </p>
+        <button onclick="location.reload()">Retry</button>
+      </div>
+
+      <div id="game-content" class="game-content" style="display: none">
+        <div class="score-tracker">
+          <div class="score-squares" id="score-squares"></div>
+        </div>
+
+        <div class="daily-game-row">
+          <div class="character-container left">
+            <div class="character-card">
+              <h2 id="left-character">Character Name</h2>
+              <div id="left-character-notes" class="character-subtext"></div>
+              <div
+                id="left-count-container"
+                class="post-count hard-hidden"
+                style="display: none"
+              >
+                <span id="left-count-display">0</span>
+                <span class="label">posts</span>
+              </div>
+              <div class="question-mark left-question-mark">?</div>
+            </div>
+          </div>
+
+          <div class="vs-section">
+            <div class="instruction-text">Which has more posts?</div>
+            <div class="vs-text">VS</div>
+          </div>
+
+          <div class="character-container right">
+            <div class="character-card">
+              <h2 id="right-character">Character Name</h2>
+              <div id="right-character-notes" class="character-subtext"></div>
+              <div
+                id="right-count-container"
+                class="post-count hard-hidden"
+                style="display: none"
+              >
+                <span id="right-count">0</span>
+                <span class="label">posts</span>
+              </div>
+              <div class="question-mark right-question-mark">?</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="result-overlay" class="result-overlay" style="display: none">
+        <div class="result-content">
+          <h2 id="result-text" class="result-text">Correct!</h2>
+          <div class="result-buttons">
+            <button id="next-btn" class="btn primary">Next Round</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="final-score-popup" class="popup-overlay" style="display: none">
+        <div class="popup-content">
+          <div class="popup-header">
+            <h2>Daily Challenge Complete!</h2>
+          </div>
+          <div class="popup-body">
+            <div class="final-score">
+              <h3>Your Score: <span id="final-score-text">0/10</span></h3>
+              <div class="score-breakdown" id="score-breakdown"></div>
+            </div>
+
+            <p>Come back tomorrow for a new daily challenge!</p>
+
+            <div class="countdown-container">
+              <div class="countdown-label">Next Daily in</div>
+              <div id="next-daily-timer" class="countdown-time">--:--:--</div>
+              <div class="countdown-sub">rolls over at 00:00 UTC</div>
+            </div>
+          </div>
+          <div class="popup-footer">
+            <button id="play-main-mode-btn" class="btn secondary">
+              Play Main Mode
+            </button>
+            <button id="share-score-btn" class="btn primary">Share Score</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="daily.js"></script>
+  <script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"version":"2024.11.0","token":"44c7786d05eb4ea5a26b1aee7589d9de","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+
+<!-- Mirrored from www.rule34dle.org/game/daily.html?embed=true by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 13 Jan 2026 14:37:07 GMT -->
+</html>
+
